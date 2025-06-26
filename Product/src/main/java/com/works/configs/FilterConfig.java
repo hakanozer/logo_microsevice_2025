@@ -21,9 +21,9 @@ public class FilterConfig implements Filter {
         String sessionId = request.getSession().getId();
 
         System.out.println(uri + " " + ip + " " + agent + " " + sessionId);
-        if (ip.equals("0:0:0:0:0:0:0:1")) {
-            filterChain.doFilter(request, response);
-        }
+        //if (ip.equals("0:0:0:0:0:0:0:1")) {
+        filterChain.doFilter(request, response);
+        //}
     }
 
 }
