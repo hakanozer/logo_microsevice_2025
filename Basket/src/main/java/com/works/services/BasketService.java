@@ -9,6 +9,7 @@ import com.works.models.LoginModel;
 import com.works.models.Product;
 import com.works.repositories.BasketRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,9 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class BasketService {
+
+    @Value("${app.customData}")
+    private String customData;
 
     private final DiscoveryClient discoveryClient;
     private final BasketRepository basketRepository;
@@ -55,6 +59,7 @@ public class BasketService {
             basketModel.setProduct(pro);
             basketModels.add(basketModel);
         }
+        System.out.println("pull data: " + customData);
         return basketModels;
     }
 
