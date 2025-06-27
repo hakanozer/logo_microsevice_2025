@@ -2,6 +2,7 @@ package com.works.services;
 
 import com.works.entities.Basket;
 import com.works.feigns.IBulut;
+import com.works.feigns.IDummy;
 import com.works.feigns.IProduct;
 import com.works.models.BasketModel;
 import com.works.models.JwtLogin;
@@ -11,6 +12,8 @@ import com.works.repositories.BasketRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -27,10 +30,14 @@ public class BasketService {
     @Value("${app.customData}")
     private String customData;
 
+    private final CircuitBreakerFactory circuitBreakerFactory;
+    private final CircuitBreakerFactory circuitBreakerGlobal;
+
     private final DiscoveryClient discoveryClient;
     private final BasketRepository basketRepository;
     private final IProduct iProduct;
     private final IBulut iBulut;
+    private final IDummy iDummy;
 
     public Basket save(Basket basket) {
         return basketRepository.save(basket);
@@ -60,7 +67,32 @@ public class BasketService {
             basketModels.add(basketModel);
         }
         System.out.println("pull data: " + customData);
+        String data = circuitBreakerFactory.create("dummy").run(
+                () -> iDummy.products("1"),
+                throwable -> fallBack("1")
+        );
+        System.out.println(data);
+
+        CircuitBreaker breaker = circuitBreakerGlobal.create("dummy1");
+        String pullData = breaker.run(
+                () -> iDummy.singleCard("1"),
+                throwable -> fallBack("1")
+        );
+        System.out.println("dummy1:" + pullData);
         return basketModels;
+    }
+
+    private String call(String id) {
+        try {
+            Thread.sleep(5000);
+        }catch (Exception e){
+
+        }
+        return "Call :" + id;
+    }
+
+    private String fallBack(String id) {
+        return "Daha sonra deneyiniz!";
     }
 
     public JwtLogin login(LoginModel loginModel) {

@@ -14,4 +14,6 @@ public interface IBulut {
     @PostMapping("auth/login")
     JwtLogin login(@RequestBody LoginModel loginModel);
 
+
+
 }
