@@ -1,6 +1,9 @@
 package com.works.restcontrollers;
 
 import com.works.entities.Basket;
+import com.works.models.BasketModel;
+import com.works.models.JwtLogin;
+import com.works.models.LoginModel;
 import com.works.services.BasketService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -20,8 +23,13 @@ public class BasketRestController {
     }
 
     @GetMapping("list")
-    public List<Basket> list() {
+    public List<BasketModel> list() {
         return basketService.basketList();
+    }
+
+    @PostMapping("login")
+    public JwtLogin login(@RequestBody LoginModel loginModel) {
+        return basketService.login(loginModel);
     }
 
 

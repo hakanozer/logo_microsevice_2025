@@ -8,6 +8,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +25,11 @@ public class ProductService {
 
     public List<Product> findAllProduct() {
         return productRepository.findAll();
+    }
+
+    public Product findProductById(Long productId) {
+        Optional<Product> product = productRepository.findById(productId);
+        return product.orElse(null);
     }
 
 }

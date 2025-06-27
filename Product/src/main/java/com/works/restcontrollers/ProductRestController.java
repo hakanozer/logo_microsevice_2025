@@ -33,4 +33,9 @@ public class ProductRestController {
         return productService.findAllProduct();
     }
 
+    @GetMapping("single")
+    public Product findById(@RequestParam Long id) {
+        return productService.findProductById(id);
+    }
+
 }
