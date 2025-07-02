@@ -1,0 +1,14 @@
+spring:
+  cloud:
+    gateway:
+      server:
+        webmvc:
+          routes:
+            - id: productModule
+              uri: lb://product
+              predicates:
+                - Path=/product/**
+            - id: basketModule
+              uri: lb://basket
+              predicates:
+                - Path=/basket/**
