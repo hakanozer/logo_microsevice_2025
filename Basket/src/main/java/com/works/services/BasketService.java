@@ -68,8 +68,8 @@ public class BasketService {
         }
         System.out.println("pull data: " + customData);
         String data = circuitBreakerFactory.create("dummy").run(
-                () -> iDummy.products("1"),
-                throwable -> fallBack("1")
+                () -> iDummy.products("1000"),
+                throwable -> fallBack("1000")
         );
         System.out.println(data);
 
@@ -96,6 +96,8 @@ public class BasketService {
     }
 
     public JwtLogin login(LoginModel loginModel) {
+        //int i = 1;
+        //int sum = i / 0;
         return iBulut.login(loginModel);
     }
 
