@@ -5,11 +5,10 @@ import com.works.entities.dto.ProductAddDto;
 import com.works.repositories.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -17,15 +16,13 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final ModelMapper modelMapper;
+    private final JmsTemplate jmsTemplate;
 
-    public Product addProduct(ProductAddDto productAddDto) {
-        try {
-            Thread.sleep(1000);
-        }catch (Exception ex){}
-        Product product = modelMapper.map(productAddDto, Product.class);
-        product.setTitle(UUID.randomUUID().toString());
-        productRepository.save(product);
-        return product;
+    public Map<String, String> addProduct(ProductAddDto productAddDto) {
+        jmsTemplate.convertAndSend("productDestination",productAddDto);
+        Map<String, String> result = new HashMap<>();
+        result.put("status", "OK");
+        return result;
     }
 
     public List<Product> findAllProduct() {
@@ -36,5 +33,6 @@ public class ProductService {
         Optional<Product> product = productRepository.findById(productId);
         return product.orElse(null);
     }
+
 
 }
