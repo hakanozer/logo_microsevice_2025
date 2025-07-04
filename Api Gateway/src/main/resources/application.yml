@@ -12,3 +12,7 @@ spring:
               uri: lb://basket
               predicates:
                 - Path=/basket/**
+  data:
+    redis:
+      host: localhost
+      port: 6379
