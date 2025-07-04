@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.SimpleTimeZone;
 
 @RestController
 @RequiredArgsConstructor
@@ -19,13 +21,8 @@ public class ProductRestController {
     private final ProductService productService;
 
     @PostMapping("add")
-    public ResponseEntity add(@Valid @RequestBody ProductAddDto productAddDto) {
-        try {
-            Product addProduct = productService.addProduct(productAddDto);
-            return new ResponseEntity<>(addProduct, HttpStatus.OK);
-        }catch (Exception e){
-            return new ResponseEntity<>("Unique title product", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    public Map<String, String> add(@Valid @RequestBody ProductAddDto productAddDto) {
+        return productService.addProduct(productAddDto);
     }
 
     @GetMapping("list")
@@ -37,5 +34,6 @@ public class ProductRestController {
     public Product findById(@RequestParam Long id) {
         return productService.findProductById(id);
     }
+
 
 }
