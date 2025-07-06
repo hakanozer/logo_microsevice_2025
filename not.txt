@@ -1,0 +1,40 @@
+ActiveMQ'yu İndirme ve Çalıştırma
+https://activemq.apache.org/download
+
+
+Windows İçin:
+
+cd C:\ActiveMQ\apache-activemq-x.x.x\bin
+activemq.bat start
+
+
+Mac İçin:
+
+cd /Users/username/ActiveMQ/apache-activemq-x.x.x/bin
+./activemq start
+
+
+ActiveMQ Web Yönetim Konsolu
+URL: http://localhost:8161
+Kullanıcı Adı: admin
+Şifre: admin
+
+
+-----------------------------------------
+Zipkin İndirme ve Çalıştırma
+
+https://zipkin.io/
+indirme
+curl -sSL https://zipkin.io/quickstart.sh | bash -s
+
+çalıştırma
+java -jar zipkin.jar
+
+Dashboard
+http://localhost:9411
+
+Redis - Docker
+docker run -p 6379:6379 redis
+
+
+

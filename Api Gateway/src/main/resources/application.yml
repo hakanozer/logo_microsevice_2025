@@ -2,16 +2,42 @@ spring:
   cloud:
     gateway:
       server:
-        webmvc:
+        webflux:
           routes:
             - id: productModule
               uri: lb://product
               predicates:
                 - Path=/product/**
+              # REMOVE THE FILTERS SECTION FOR THIS ROUTE
+              # filters:
+              #   - name: RequestRateLimiter
+              #     args:
+              #       redis-rate-limiter.replenishRate: 5
+              #       redis-rate-limiter.burstCapacity: 10
+              #       key-resolver: "#{@ipKeyResolver}"
+              #       includeHeaders: false
+
             - id: basketModule
               uri: lb://basket
               predicates:
                 - Path=/basket/**
+              # REMOVE THE FILTERS SECTION FOR THIS ROUTE
+              # filters:
+              #   - name: RequestRateLimiter
+              #     args:
+              #       redis-rate-limiter.replenishRate: 3
+              #       redis-rate-limiter.burstCapacity: 6
+              #       key-resolver: "#{@ipKeyResolver}"
+              #       includeHeaders: false
+
+          default-filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 2
+                redis-rate-limiter.burstCapacity: 4
+                key-resolver: "#{@ipKeyResolver}"
+                includeHeaders: false
+
   data:
     redis:
       host: localhost

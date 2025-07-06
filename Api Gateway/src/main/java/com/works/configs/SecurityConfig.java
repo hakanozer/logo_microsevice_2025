@@ -4,45 +4,30 @@ import com.works.services.CustomerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
+import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.server.SecurityWebFilterChain;
 
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    final private CustomerService customerService;
-    final private PasswordEncoder passwordEncoder;
-    final private GlobalFilter globalFilter;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http
+    public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http) {
+         http
                 .httpBasic(Customizer.withDefaults())
-                .authorizeHttpRequests(
+                .authorizeExchange(
                 req -> req
-                        .requestMatchers("/product/**").hasRole("product")
-                        .requestMatchers("/basket/**").hasRole("basket")
-                        .requestMatchers("/customer/**").permitAll()
+                        .pathMatchers("/product/**").hasRole("product")
+                        .pathMatchers("/basket/**").hasRole("basket")
+                        .pathMatchers("/customer/**").permitAll()
                 )
-                .csrf(AbstractHttpConfigurer::disable)
-                .formLogin(AbstractHttpConfigurer::disable)
-                .addFilterBefore(globalFilter, UsernamePasswordAuthenticationFilter.class)
-                .build();
-    }
-
-    @Bean
-    public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
-        daoAuthenticationProvider.setUserDetailsService(customerService);
-        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder);
-        return daoAuthenticationProvider;
+                .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                .formLogin(ServerHttpSecurity.FormLoginSpec::disable);
+        return http.build();
     }
 
 }

@@ -1,58 +1,59 @@
-
 package com.works.configs;
 
 import com.works.entities.Info;
 import com.works.repositories.InfoRepository;
 import io.micrometer.tracing.CurrentTraceContext;
-import io.micrometer.tracing.TraceContext;
 import io.micrometer.tracing.Tracer;
-import jakarta.servlet.*;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-
-import java.io.IOException;
+import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.WebFilterChain;
+import reactor.core.publisher.Mono;
 
 @Configuration
 @RequiredArgsConstructor
-public class GlobalFilter implements Filter {
+public class GlobalFilter implements WebFilter {
 
-    final private InfoRepository infoRepo;
-    final private Tracer tracer;
+    private final InfoRepository infoRepo;
+    private final Tracer tracer;
 
     @Override
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        HttpServletRequest request = (HttpServletRequest) servletRequest;
-        HttpServletResponse response = (HttpServletResponse) servletResponse;
-
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = "";
-        String roles = "";
-        if (auth != null) {
-            username = auth.getName();
-            roles = auth.getAuthorities().toString();
-        }
-        String url = request.getRequestURI();
-        String sessionId = request.getRequestedSessionId();
-        String userAgent = request.getHeader("User-Agent");
-        String ip = request.getRemoteAddr();
-        long time = System.currentTimeMillis();
-
-        Info info = new Info(null, username, roles, url, sessionId, userAgent, ip, time);
-        infoRepo.save(info);
-
+    public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
+        HttpHeaders headers = exchange.getResponse().getHeaders();
         CurrentTraceContext traceContext = tracer.currentTraceContext();
         if (traceContext.context() != null) {
             String spanId = traceContext.context().spanId();
             String traceId = traceContext.context().traceId();
-            //System.out.println( spanId + " " + traceId + " " + parentId );
-            response.setHeader("TraceId", traceId);
-            response.setHeader("SpanId", spanId);
+            headers.add("TraceId", traceId);
+            headers.add("SpanId", spanId);
         }
-        filterChain.doFilter(request, response);
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = "";
+        String roles = "";
+
+        if (auth != null) {
+            username = auth.getName();
+            roles = auth.getAuthorities().iterator().next().toString();
+        }
+
+        String url = exchange.getRequest().getURI().getPath();
+        String sessionId = exchange.getRequest().getCookies().getFirst("JSESSIONID") != null ?
+                exchange.getRequest().getCookies().getFirst("JSESSIONID").getValue() : null;
+        String userAgent = exchange.getRequest().getHeaders().getFirst("User-Agent");
+        String ip = exchange.getRequest().getRemoteAddress() != null ?
+                exchange.getRequest().getRemoteAddress().getAddress().getHostAddress() : "unknown";
+        long time = System.currentTimeMillis();
+        Info i = new Info(null, username, roles, url, sessionId, userAgent, ip, time);
+        infoRepo.save(i);
+        System.out.println(i);
+       return chain.filter(exchange);
+
     }
+
 
 }
